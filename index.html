@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="笑笑嬉 Azia 点歌歌单">
-    <title>笑笑嬉 Azia 歌单</title>
-    <link rel="icon" type="image/webp" href="https://i0.hdslb.com/bfs/face/907d58faab59fe72caf778ff10eccc6569273ad9.jpg@128w_128h_1c_1s.webp" onerror="this.onerror=null;this.type='image/png';this.href='assets/azia-avatar.png'">
-    <link rel="apple-touch-icon" href="https://i0.hdslb.com/bfs/face/907d58faab59fe72caf778ff10eccc6569273ad9.jpg@128w_128h_1c_1s.webp" onerror="this.onerror=null;this.href='assets/azia-avatar.png'">
+    <meta name="description" content="诸宝儿点歌歌单">
+    <title>诸宝儿歌单</title>
+    <link rel="icon" type="image/png" href="assets/zhu-avatar.png">
+    <link rel="apple-touch-icon" href="assets/zhu-avatar.png">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -19,14 +19,14 @@
 
     <header class="site-header">
       <nav class="topbar" aria-label="主导航">
-        <a class="brand" href="https://space.bilibili.com/3546895548943133" target="_blank" rel="noreferrer">
-          <img src="https://i0.hdslb.com/bfs/face/907d58faab59fe72caf778ff10eccc6569273ad9.jpg@128w_128h_1c_1s.webp" alt="Azia 头像" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='assets/azia-avatar.png'">
-          <span>笑笑嬉 Azia</span>
+        <a class="brand" href="https://space.bilibili.com/455589846" target="_blank" rel="noreferrer">
+          <img src="assets/zhu-avatar.png" alt="诸宝儿头像">
+          <span>诸宝儿</span>
         </a>
         <div class="nav-actions">
           <button id="randomSongMobile" class="random-song random-song-mobile" type="button" data-random-song>✦ 随机点歌</button>
-          <a id="liveLink" class="live-link" href="https://live.bilibili.com/1828188123" data-app-url="bilibili://live/1828188123" target="_blank" rel="noreferrer">进入直播间</a>
-          <a class="bili-link" href="https://space.bilibili.com/3546895548943133" target="_blank" rel="noreferrer">Bilibili</a>
+          <a id="liveLink" class="live-link" href="https://live.bilibili.com/1879181112" data-app-url="bilibili://live/1879181112" target="_blank" rel="noreferrer">进入直播间</a>
+          <a class="bili-link" href="https://space.bilibili.com/455589846" target="_blank" rel="noreferrer">Bilibili</a>
         </div>
       </nav>
     </header>
@@ -35,8 +35,8 @@
       <section class="playlist-section" aria-labelledby="page-title">
         <div class="playlist-hero">
           <div class="title-copy">
-            <p class="eyebrow">AZIA'S SONGBOOK</p>
-            <h1 id="page-title">歌单 · 听见花开的声音</h1>
+            <p class="eyebrow">ZHU BAOER'S SONGBOOK</p>
+            <h1 id="page-title">诸宝儿 · 歌单</h1>
             <p class="playlist-hint">选一首喜欢的歌，复制口令去直播间点歌</p>
           </div>
           <div class="hero-actions">
@@ -49,37 +49,25 @@
           <label class="search-field">
             <span class="sr-only">搜索</span>
             <span class="search-icon" aria-hidden="true">⌕</span>
-            <input id="searchInput" type="search" placeholder="搜索歌名或歌手" autocomplete="off">
+            <input id="searchInput" type="search" placeholder="搜索歌名" autocomplete="off">
           </label>
 
-          <div class="controls" aria-label="歌单筛选">
+          <div class="controls" aria-label="歌单排序">
             <div class="mobile-menus" aria-label="移动端筛选">
-              <label class="mobile-select">
-                <span class="sr-only">分类</span>
-                <select id="categorySelect" aria-label="分类"></select>
-              </label>
-
               <label class="mobile-select">
                 <span class="sr-only">排序</span>
                 <select id="sortSelect" aria-label="排序方式">
-                  <option value="default">默认</option>
                   <option value="initial">首字母</option>
-                  <option value="length">长短</option>
+                  <option value="length" selected>长短</option>
                 </select>
               </label>
-            </div>
-
-            <div class="control-group" aria-label="分类筛选">
-              <span>分类</span>
-              <div id="categoryFilters" class="segmented"></div>
             </div>
 
             <div class="control-group" aria-label="排序方式">
               <span>排序</span>
               <div class="segmented">
-                <button type="button" class="is-active" data-sort="default">默认</button>
                 <button type="button" data-sort="initial">首字母</button>
-                <button type="button" data-sort="length">长短</button>
+                <button type="button" class="is-active" data-sort="length">长短</button>
               </div>
             </div>
           </div>
@@ -93,16 +81,6 @@
         <div id="pagination" class="pagination" aria-label="分页"></div>
       </section>
 
-      <section class="video-section" aria-labelledby="video-title">
-        <div class="section-heading">
-          <div>
-            <h2 id="video-title">最近投稿</h2>
-          </div>
-        </div>
-        <div class="video-rail" aria-label="投稿视频滚动列表">
-          <div id="videoTrack" class="video-track"></div>
-        </div>
-      </section>
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>

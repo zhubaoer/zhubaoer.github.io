@@ -1,13 +1,13 @@
 :root {
-  --paper: #fffdf7;
-  --paper-deep: #f1e8f1;
-  --iris: #76527f;
-  --iris-deep: #52385b;
-  --iris-soft: #eadfec;
-  --blush: #e9cbd5;
-  --ink: #453648;
-  --muted: #594a5c;
-  --faint: #5e5060;
+  --paper: #fffafd;
+  --paper-deep: #ece4ff;
+  --iris: #9274ca;
+  --iris-deep: #654b9c;
+  --iris-soft: #e3d8fb;
+  --blush: #f4cddf;
+  --ink: #4a3c62;
+  --muted: #665779;
+  --faint: #766a87;
   --glass: rgba(255, 255, 255, 0.48);
   --glass-strong: rgba(255, 255, 255, 0.72);
   --glass-static: rgba(255, 255, 255, 0.64);
@@ -76,7 +76,7 @@ select {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background-image: url("assets/azia-songbook-desktop-anime.png");
+  background-image: url("assets/zhu-songbook-desktop-anime.png");
   background-position: center right;
   background-repeat: no-repeat;
   background-size: cover;
@@ -178,10 +178,10 @@ main {
 .live-link,
 .bili-link {
   display: inline-flex;
-  min-height: 30px;
+  min-height: 34px;
   flex: 0 0 auto;
   align-items: center;
-  padding: 0 11px;
+  padding: 0 13px;
   border: 1px solid var(--glass-line);
   border-radius: 999px;
   font-size: 13px;
@@ -210,15 +210,14 @@ main {
 }
 
 main {
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  gap: 10px;
-  height: calc(100dvh - 56px);
+  display: flex;
+  height: calc(80dvh - 56px);
   min-height: 0;
-  padding-bottom: 14px;
+  padding-bottom: 30px;
 }
 
 .playlist-section {
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -340,7 +339,7 @@ h2 {
 
 .playlist-tools {
   display: grid;
-  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  grid-template-columns: minmax(240px, 1fr) auto;
   gap: 14px;
   align-items: center;
   min-width: 0;
@@ -500,10 +499,11 @@ h2 {
 }
 
 .song-list {
-  --song-min-width: 260px;
+  --song-min-width: 190px;
   --song-row-height: 35px;
 
   min-width: 0;
+  height: auto;
   min-height: 0;
   flex: 1 1 auto;
   overflow: hidden;
@@ -531,8 +531,8 @@ h2 {
   width: 100%;
   height: var(--song-row-height);
   min-height: var(--song-row-height);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(36px, 0.45fr) auto;
+  display: flex;
+  align-items: center;
   align-items: center;
   gap: 8px;
   padding: 0 9px;
@@ -557,13 +557,11 @@ h2 {
   white-space: nowrap;
 }
 
-.song-title-text,
-.song-singer-text {
+.song-title-text {
   display: inline;
 }
 
-.song-title.is-scrollable .song-title-text,
-.song-singer.is-scrollable .song-singer-text {
+.song-title.is-scrollable .song-title-text {
   will-change: transform;
 }
 
@@ -586,37 +584,6 @@ h2 {
   100% {
     transform: translateX(calc(var(--song-scroll-distance, 0px) * -1));
   }
-}
-
-.song-singer {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--faint);
-  font-size: 11px;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.song-singer:hover .song-singer-text,
-.song-row:focus .song-singer.is-scrollable .song-singer-text,
-.song-row:focus-visible .song-singer.is-scrollable .song-singer-text {
-  display: inline-block;
-  min-width: 100%;
-  animation: song-text-scroll var(--song-scroll-duration, 4.8s) ease-in-out infinite alternate;
-  text-overflow: clip;
-}
-
-.song-category {
-  flex: 0 0 auto;
-  padding: 3px 7px;
-  border-radius: 999px;
-  color: var(--iris);
-  background: rgba(234, 223, 236, 0.74);
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1.2;
-  white-space: nowrap;
 }
 
 .pagination {
@@ -660,54 +627,6 @@ h2 {
   outline: 2px solid #fffdf7;
   outline-offset: 2px;
   box-shadow: 0 0 0 5px var(--iris-deep);
-}
-
-.video-section {
-  min-width: 0;
-  padding: 9px 0 0;
-  border-top: 1px solid rgba(118, 82, 127, 0.12);
-}
-
-.section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 7px;
-}
-
-.section-heading .summary {
-  color: var(--faint);
-}
-
-.video-rail {
-  min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  cursor: grab;
-  scrollbar-width: none;
-  touch-action: pan-x;
-  -webkit-overflow-scrolling: touch;
-}
-
-.video-rail::-webkit-scrollbar {
-  display: none;
-}
-
-.video-rail.is-dragging {
-  cursor: grabbing;
-  user-select: none;
-}
-
-.video-rail.is-dragging .video-card {
-  pointer-events: none;
-}
-
-.video-track {
-  display: flex;
-  gap: 8px;
-  width: max-content;
-  min-width: max-content;
 }
 
 .video-card {
@@ -829,7 +748,7 @@ h2 {
   }
 
   .playlist-tools {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr auto;
     gap: 9px;
   }
 
@@ -848,7 +767,7 @@ h2 {
 
 @media (max-width: 520px) {
   .character-backdrop {
-    background-image: url("assets/azia-songbook-mobile-anime.png");
+    background-image: url("assets/zhu-songbook-mobile-anime.png");
     background-position: right center;
     opacity: 0.24;
     -webkit-mask-image: linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.82) 44%, transparent 88%);
@@ -894,7 +813,7 @@ h2 {
   }
 
   main {
-    height: calc(100dvh - 61px);
+    height: calc(90dvh - 61px);
     min-height: 0;
     gap: 8px;
     padding-bottom: 9px;
@@ -969,7 +888,7 @@ h2 {
   .playlist-tools {
     position: relative;
     min-height: 44px;
-    grid-template-columns: minmax(0, 1fr) 142px;
+    grid-template-columns: minmax(0, 1fr) 112px;
     gap: 6px;
   }
 
@@ -995,12 +914,12 @@ h2 {
   .controls {
     min-width: 0;
     display: block;
-    width: 142px;
+    width: 112px;
   }
 
   .mobile-menus {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 6px;
     min-width: 0;
     width: 100%;
@@ -1049,14 +968,15 @@ h2 {
 
   .song-list {
     --song-row-height: 40px;
-
+    height: auto;
+    min-height: 0;
+    flex: 1 1 auto;
     grid-template-columns: minmax(0, 1fr);
     gap: 6px;
   }
 
   .song-row {
     min-height: 40px;
-    grid-template-columns: minmax(0, 1fr) minmax(52px, 0.36fr) auto;
   }
 
   .pagination {

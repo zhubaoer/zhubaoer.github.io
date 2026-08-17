@@ -1,10 +1,8 @@
 (function () {
   const state = {
     songs: [],
-    videos: [],
     query: '',
-    category: '全部',
-    sort: 'default',
+    sort: 'length',
     page: 1,
     pageSize: 30,
   };
@@ -14,30 +12,17 @@
     randomSongs: document.querySelectorAll('[data-random-song]'),
     resultSummary: document.querySelector('#resultSummary'),
     searchInput: document.querySelector('#searchInput'),
-    categoryFilters: document.querySelector('#categoryFilters'),
-    categorySelect: document.querySelector('#categorySelect'),
     sortButtons: document.querySelectorAll('[data-sort]'),
     sortSelect: document.querySelector('#sortSelect'),
     statusMessage: document.querySelector('#statusMessage'),
     songGrid: document.querySelector('#songGrid'),
     pagination: document.querySelector('#pagination'),
-    videoTrack: document.querySelector('#videoTrack'),
     liveLink: document.querySelector('#liveLink'),
     toast: document.querySelector('#toast'),
   };
 
-  const VIDEO_AUTO_PIXELS_PER_SECOND = 60;
   let toastTimer;
   let renderFrame;
-  let videoAutoFrame;
-  let videoAutoPreviousTime;
-  let videoAutoPausedUntil = 0;
-  let videoAutoPosition = 0;
-  let videoAutoElapsed = 0;
-  let videoRailKeyboardFocused = false;
-  let videoDragState = null;
-  let suppressVideoClick = false;
-  const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   const collator = new Intl.Collator('zh-Hans-u-co-pinyin', {
     numeric: true,
@@ -119,34 +104,25 @@
     return String(value || '').toLocaleLowerCase('zh-CN').replace(/\s+/g, '');
   }
 
-  function getCategories() {
-    const categories = [];
-    state.songs.forEach((song) => {
-      if (song.category && !categories.includes(song.category)) {
-        categories.push(song.category);
-      }
-    });
-    return ['全部'].concat(categories);
-  }
-
   function getFilteredSongs() {
     const query = normalize(state.query);
     const filtered = state.songs.filter((song) => {
-      const matchesCategory = state.category === '全部' || song.category === state.category;
       const matchesQuery = !query
-        || normalize(song.title).includes(query)
-        || normalize(song.singer).includes(query);
-      return matchesCategory && matchesQuery;
+        || normalize(song.title).includes(query);
+      return matchesQuery;
     });
 
     if (state.sort === 'initial') {
-      return filtered.sort((left, right) => collator.compare(left.title, right.title));
+      return filtered.sort((left, right) => {
+        const initialDiff = collator.compare(left.title[0], right.title[0]);
+        return initialDiff || right.title.length - left.title.length || collator.compare(left.title, right.title);
+      });
     }
 
     if (state.sort === 'length') {
       return filtered.sort((left, right) => {
         const diff = left.title.length - right.title.length;
-        return diff || collator.compare(left.title, right.title);
+        return diff || collator.compare(left.title[0], right.title[0]) || collator.compare(left.title, right.title);
       });
     }
 
@@ -204,28 +180,6 @@
       throw new Error(`无法加载 ${path}`);
     }
     return parseCsv(decodeCsvBuffer(await response.arrayBuffer()));
-  }
-
-  function getSinger(song) {
-    return song.singer || '未知歌手';
-  }
-
-  function renderCategories() {
-    const categories = getCategories();
-
-    els.categoryFilters.innerHTML = categories
-      .map((category) => {
-        const active = category === state.category ? ' class="is-active"' : '';
-        return `<button type="button"${active} data-category="${escapeHtml(category)}">${escapeHtml(category)}</button>`;
-      })
-      .join('');
-
-    els.categorySelect.innerHTML = categories
-      .map((category) => {
-        const selected = category === state.category ? ' selected' : '';
-        return `<option value="${escapeAttribute(category)}"${selected}>${escapeHtml(category)}</option>`;
-      })
-      .join('');
   }
 
   function syncSortControls() {
@@ -304,7 +258,7 @@
 
   function prepareSongTextScroll() {
     window.requestAnimationFrame(() => {
-      els.songGrid.querySelectorAll('.song-title, .song-singer').forEach((field) => {
+      els.songGrid.querySelectorAll('.song-title').forEach((field) => {
         const overflow = Math.ceil(field.scrollWidth - field.clientWidth);
         field.classList.toggle('is-scrollable', overflow > 2);
         field.style.setProperty('--song-scroll-distance', `${Math.max(0, overflow)}px`);
@@ -331,8 +285,6 @@
       els.songGrid.innerHTML = pageItems.map((song) => `
         <button type="button" class="song-row" data-title="${escapeAttribute(song.title)}" title="复制：点歌 ${escapeAttribute(song.title)}">
           <div class="song-title"><span class="song-title-text">${escapeHtml(song.title)}</span></div>
-          <div class="song-singer"><span class="song-singer-text">${escapeHtml(getSinger(song))}</span></div>
-          <div class="song-category">${escapeHtml(song.category)}</div>
         </button>
       `).join('');
       prepareSongTextScroll();
@@ -364,101 +316,6 @@
     pageButtons.push(`<label class="page-select"><span class="sr-only">选择页码</span><select id="pageSelect" aria-label="选择页码">${pageOptions}</select></label>`);
 
     els.pagination.innerHTML = pageButtons.join('');
-  }
-
-  function renderVideos() {
-    if (state.videos.length === 0) {
-      els.videoTrack.innerHTML = '<p class="status">暂无投稿视频。</p>';
-      return;
-    }
-
-    const cards = state.videos.map((video) => `
-      <a class="video-card" href="${escapeHtml(video.url)}" target="_blank" rel="noreferrer">
-        <img src="${escapeHtml(video.cover)}" alt="${escapeHtml(video.title)}" loading="lazy" referrerpolicy="no-referrer">
-        <div class="video-body">
-          <div class="video-title">${escapeHtml(video.title)}</div>
-          <div class="video-meta">
-            <span>${escapeHtml(video.date)}</span>
-            <span>${escapeHtml(video.tag || '投稿')}</span>
-          </div>
-        </div>
-      </a>
-    `).join('');
-
-    els.videoTrack.innerHTML = cards + cards;
-  }
-
-  function pauseVideoAutoScroll(duration = 2600) {
-    videoAutoPausedUntil = performance.now() + duration;
-  }
-
-  function startVideoAutoScroll() {
-    if (reducedMotionQuery.matches) {
-      return;
-    }
-
-    const rail = els.videoTrack.closest('.video-rail');
-    window.cancelAnimationFrame(videoAutoFrame);
-    videoAutoPreviousTime = undefined;
-    videoAutoPosition = Math.max(0, Math.round(rail.scrollLeft));
-    videoAutoElapsed = 0;
-
-    function step(time) {
-      const elapsed = videoAutoPreviousTime === undefined
-        ? 0
-        : Math.min(64, Math.max(0, time - videoAutoPreviousTime));
-      videoAutoPreviousTime = time;
-
-      const canAutoScroll = (
-        !document.hidden
-        && time >= videoAutoPausedUntil
-        && !videoDragState
-        && !videoRailKeyboardFocused
-        && rail.scrollWidth > rail.clientWidth
-      );
-
-      if (canAutoScroll) {
-        videoAutoElapsed += elapsed;
-        const pixelsToMove = Math.floor(videoAutoElapsed * VIDEO_AUTO_PIXELS_PER_SECOND / 1000);
-        if (pixelsToMove > 0) {
-          videoAutoElapsed -= pixelsToMove * 1000 / VIDEO_AUTO_PIXELS_PER_SECOND;
-          videoAutoPosition += pixelsToMove;
-          const resetPoint = Math.max(0, Math.floor(els.videoTrack.scrollWidth / 2));
-          if (resetPoint && videoAutoPosition >= resetPoint) {
-            videoAutoPosition %= resetPoint;
-          }
-          rail.scrollLeft = videoAutoPosition;
-        }
-      } else {
-        videoAutoPosition = Math.max(0, Math.round(rail.scrollLeft));
-        videoAutoElapsed = 0;
-      }
-
-      videoAutoFrame = window.requestAnimationFrame(step);
-    }
-
-    videoAutoFrame = window.requestAnimationFrame(step);
-  }
-
-  function handleReducedMotionChange(event) {
-    if (event.matches) {
-      window.cancelAnimationFrame(videoAutoFrame);
-      videoAutoFrame = undefined;
-      videoAutoPreviousTime = undefined;
-      videoAutoElapsed = 0;
-      return;
-    }
-
-    startVideoAutoScroll();
-  }
-
-  function handleVideoVisibilityChange() {
-    videoAutoPreviousTime = undefined;
-    if (document.hidden || reducedMotionQuery.matches) {
-      return;
-    }
-
-    startVideoAutoScroll();
   }
 
   function showToast(message) {
@@ -523,24 +380,6 @@
       renderSongs();
     });
 
-    els.categoryFilters.addEventListener('click', (event) => {
-      const button = event.target.closest('[data-category]');
-      if (!button) {
-        return;
-      }
-      state.category = button.dataset.category;
-      state.page = 1;
-      renderCategories();
-      renderSongs();
-    });
-
-    els.categorySelect.addEventListener('change', (event) => {
-      state.category = event.target.value;
-      state.page = 1;
-      renderCategories();
-      renderSongs();
-    });
-
     els.songGrid.addEventListener('click', (event) => {
       const button = event.target.closest('[data-title]');
       if (!button) {
@@ -592,96 +431,13 @@
     }
   }
 
-  function bindVideoDrag() {
-    const rail = els.videoTrack.closest('.video-rail');
-
-    rail.addEventListener('pointerdown', (event) => {
-      if (event.pointerType !== 'mouse') {
-        pauseVideoAutoScroll();
-        return;
-      }
-
-      if (event.button !== 0) {
-        return;
-      }
-
-      videoDragState = {
-        pointerId: event.pointerId,
-        startX: event.clientX,
-        scrollLeft: rail.scrollLeft,
-        moved: false,
-      };
-      rail.classList.add('is-dragging');
-      rail.setPointerCapture(event.pointerId);
-    });
-
-    rail.addEventListener('pointermove', (event) => {
-      if (!videoDragState || event.pointerId !== videoDragState.pointerId) {
-        return;
-      }
-
-      const deltaX = event.clientX - videoDragState.startX;
-      if (Math.abs(deltaX) > 3) {
-        videoDragState.moved = true;
-      }
-      rail.scrollLeft = videoDragState.scrollLeft - deltaX;
-    });
-
-    function stopVideoDrag(event) {
-      if (!videoDragState || event.pointerId !== videoDragState.pointerId) {
-        return;
-      }
-
-      suppressVideoClick = videoDragState.moved;
-      videoDragState = null;
-      rail.classList.remove('is-dragging');
-      window.setTimeout(() => {
-        suppressVideoClick = false;
-      }, 0);
-    }
-
-    rail.addEventListener('pointerup', stopVideoDrag);
-    rail.addEventListener('pointercancel', stopVideoDrag);
-    rail.addEventListener('click', (event) => {
-      if (!suppressVideoClick) {
-        return;
-      }
-      event.preventDefault();
-      event.stopPropagation();
-    }, true);
-
-    rail.addEventListener('wheel', () => {
-      pauseVideoAutoScroll(1200);
-    }, { passive: true });
-    rail.addEventListener('focusin', (event) => {
-      videoRailKeyboardFocused = event.target.matches(':focus-visible');
-    });
-    rail.addEventListener('focusout', (event) => {
-      if (!rail.contains(event.relatedTarget)) {
-        videoRailKeyboardFocused = false;
-      }
-    });
-  }
-
   async function init() {
     try {
-      const results = await Promise.all([
-        loadCsv('data/songs.csv'),
-        loadCsv('data/videos.csv'),
-      ]);
-
-      state.songs = results[0].filter((song) => song.title);
-      state.videos = results[1].filter((video) => video.title && video.url);
+      state.songs = (await loadCsv('data/songs.csv')).filter((song) => song.title);
       els.songCount.textContent = `${state.songs.length} 首可点歌曲`;
       els.songCount.dataset.mobileText = `${state.songs.length}首`;
 
-      renderVideos();
-      renderCategories();
       bindEvents();
-      bindVideoDrag();
-      startVideoAutoScroll();
-      reducedMotionQuery.addEventListener('change', handleReducedMotionChange);
-      document.addEventListener('visibilitychange', handleVideoVisibilityChange);
       scheduleRenderSongs();
     } catch (error) {
       els.statusMessage.textContent = `${error.message}。请通过本地服务器或 GitHub Pages 打开页面。`;
